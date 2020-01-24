@@ -3,6 +3,7 @@ Created on Jan 24, 2020
 
 @author: ameier
 '''
+import numpy as np
 
 
 def rel_conv_speed(generations_of_chgperiods, global_opt_fit_per_chgperiod, best_found_fit_per_gen_and_alg,
