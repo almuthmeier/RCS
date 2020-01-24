@@ -35,9 +35,6 @@ def rel_conv_speed(generations_of_chgperiods, global_opt_fit_per_chgperiod, best
         None: if the respective run was not exexuted for the algorithm
     '''
     n_chgperiods = len(generations_of_chgperiods)
-    # assert n_chgperiods == len(global_opt_fit_per_chgperiod), "inconsistency: n_chgperiods: " + str(
-    # n_chgperiods) + " but len(global_opt_fit_per_chgperiod): " +
-    # str(len(global_opt_fit_per_chgperiod))
 
     # -------------------------------------------------------------------------
     # compute worst fitness per change achieved by any algorithm
@@ -51,9 +48,6 @@ def rel_conv_speed(generations_of_chgperiods, global_opt_fit_per_chgperiod, best
     for chgperiod_nr, gens in generations_of_chgperiods.items():
         worst_fit_per_chgperiod[chgperiod_nr] = np.max(worst_fit_evals[gens])
     # test whether worst fitness is larger than global best fitness
-    # assert len(global_opt_fit_per_chgperiod) == len(list(worst_fit_per_chgperiod.values())), "len-opt: " + \
-    #    str(len(global_opt_fit_per_chgperiod)) + " len-worst: " + \
-    #    str(len(list(worst_fit_per_chgperiod.values())))
     try:
         all_idcs = np.arange(n_chgperiods)
         bools = np.array(global_opt_fit_per_chgperiod)[all_idcs]
@@ -155,7 +149,21 @@ def __convergence_speed__(generations_of_chgperiods,
 
 
 def rcs_example():
-    pass
+    generations_of_chgperiods = {0: [0, 1, 2, 3],
+                                 1: [4],
+                                 2: [5, 6]}
+    global_opt_fit_per_chgperiod = np.array([-12, 5, -4])
+    best_found_fit_per_gen_and_alg = {
+        'a': [10, 8, 7, 6, 11, 9, 4],
+        'b': [15, 12, 12, 5, 10, 13, 7]}
+    only_for_preds = True
+    first_chgp_idx_with_pred_per_alg = {'a': 0, 'b': 0}
+    with_abs = True
+
+    speed_per_alg = rel_conv_speed(generations_of_chgperiods, global_opt_fit_per_chgperiod, best_found_fit_per_gen_and_alg,
+                                   only_for_preds, first_chgp_idx_with_pred_per_alg, with_abs)
+    print("a: ", speed_per_alg['a'])
+    print("b: ", speed_per_alg['b'])
 
 
 if __name__ == '__main__':
