@@ -1,4 +1,10 @@
 '''
+Implementation of the Relative Convergence Speed (RCS) measure.
+
+Proposed in: Almuth Meier, Oliver Kramer: "Prediction with Recurrent Neural 
+Networks in Evolutionary Dynamic Optimization". In: K. Sim and P. Kaufmann: 
+Applications of Evolutionary Computation (EvoApplications), 2018.
+
 Created on Jan 24, 2020
 
 @author: ameier
@@ -20,8 +26,8 @@ def rel_conv_speed(generations_of_chgperiods, global_opt_fit_per_chgperiod, best
     Function is called in statistical_tests.py
 
     @param generations_of_chgperiods:  dictionary containing for each change 
-    period (the real ones, not only those the EA has detected) a list with the 
-    generation numbers
+    period (the real ones, not only those the optimizer has detected) a list 
+    with the generation numbers
     @param global_opt_fit_per_chgperiod: 1d numpy array: for each change period
     the global optimum fitness (for all changes stored in the dataset 
     file, not only for those used in the experiments, i.e. 
@@ -29,10 +35,17 @@ def rel_conv_speed(generations_of_chgperiods, global_opt_fit_per_chgperiod, best
     @param best_found_fit_per_gen_and_alg: dictionary containing for each 
     algorithm a 1d numpy array that contains the best found fitness of each
     generation 
+    @param only_for_preds: if True, RCS is computed based only on those change
+    periods for that a prediction was made (might be different change periods
+    for each algorithm)
+    @param first_chgp_idx_with_pred_per_alg: dictionary containing for each 
+    algorithm the index if the first change period for that a prediction was made
+    @param with_abs: if True, RCS is computed with absolute differences as in
+    the definition, otherwise with signed differences
     @return: dictionary containing one score for each algorithm:
         Score 0 -> best algorithm
         Score 1 -> worst algorithm
-        None: if the respective run was not exexuted for the algorithm
+        None: if the respective run was not executed for the algorithm
     '''
     n_chgperiods = len(generations_of_chgperiods)
 
@@ -47,7 +60,8 @@ def rel_conv_speed(generations_of_chgperiods, global_opt_fit_per_chgperiod, best
     worst_fit_per_chgperiod = {}
     for chgperiod_nr, gens in generations_of_chgperiods.items():
         worst_fit_per_chgperiod[chgperiod_nr] = np.max(worst_fit_evals[gens])
-    # test whether worst fitness is larger than global best fitness
+    # test whether worst fitness is larger than global best fitness (should be
+    # the case in minimization problems)
     try:
         all_idcs = np.arange(n_chgperiods)
         bools = np.array(global_opt_fit_per_chgperiod)[all_idcs]
@@ -95,11 +109,18 @@ def __convergence_speed__(generations_of_chgperiods,
     @param global_opt_fit_per_chgperiod: 1d numpy array: for each change period
     the global optimum fitness (for all changes stored in the dataset 
     file, not only for those used in the experiments, i.e. 
-    len(global_opt_fit_per_chgperiod) may be larger than len(generations_of_chgperiods)
+    len(global_opt_fit_per_chgperiod) may be larger than len(generations_of_chgperiods))
     @param best_found_fit_per_gen: 1d numpy array containing for each generation 
     the best fitness value achieved by this algorithm.
     @param worst_fit_per_chgperiod: dictionary containing for each change period 
     the worst fitness value achieved by any algorithm.
+    @param only_for_preds: if True, RCS is computed based only on those change
+    periods for that a prediction was made (might be different change periods
+    for each algorithm)
+    @param first_chgp_idx_with_pred_per_alg: dictionary containing for each 
+    algorithm the index if the first change period for that a prediction was made
+    @param with_abs: if True, RCS is computed with absolute differences as in
+    the definition, otherwise with signed differences
     @return: scalar: convergence speed for this algorithm
              None: if for the respective algorithm this run was not executed
     '''
@@ -137,7 +158,7 @@ def __convergence_speed__(generations_of_chgperiods,
             gen_in_chg += 1
 
         if max_area_for_change == 0:
-            # means RCS=0 for this change period since all algorithms always
+            # means RCS=0 for this change period, since all algorithms always
             # had the global optimum fitness
             pass
         else:
@@ -149,6 +170,10 @@ def __convergence_speed__(generations_of_chgperiods,
 
 
 def rcs_example():
+    '''
+    Example with two algorithms (a and b), and three change periods.
+    A minimization problem is assumed.
+    '''
     generations_of_chgperiods = {0: [0, 1, 2, 3],
                                  1: [4],
                                  2: [5, 6]}
@@ -156,7 +181,7 @@ def rcs_example():
     best_found_fit_per_gen_and_alg = {
         'a': [10, 8, 7, 6, 11, 9, 4],
         'b': [15, 12, 12, 5, 10, 13, 7]}
-    only_for_preds = True
+    only_for_preds = False
     first_chgp_idx_with_pred_per_alg = {'a': 0, 'b': 0}
     with_abs = True
 
